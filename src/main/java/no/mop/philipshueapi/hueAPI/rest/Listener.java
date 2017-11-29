@@ -19,8 +19,7 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-        print("Cache updated for " + phBridge);
-        list.stream().map(Object::toString).forEach(this::print);
+        print("Cache updated for " + phBridge.getResourceCache().getBridgeConfiguration().getIpAddress());
     }
 
     @Override
@@ -33,23 +32,17 @@ public class Listener implements PHSDKListener {
         HueProperties.saveProperties();
     }
 
-    int switchStateOfGivenLight(PHBridge bridge, int lightIndex) {
+    void switchStateOfGivenLight(PHBridge bridge, int lightIndex, int brightness) {
         PHLight light = getGivenLight(bridge, lightIndex);
         PHLightState lastKnownLightState = light.getLastKnownLightState();
-        int brightness = getRandomBrightness();
-        System.out.println("New brightness: " + brightness);
+        print("New brightness: " + brightness);
         lastKnownLightState.setBrightness(brightness);
-        bridge.updateLightState(light, lastKnownLightState);
-        return brightness;
+        //bridge.updateLightState(light, lastKnownLightState);
     }
 
     private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
         List<PHLight> allLights = bridge.getResourceCache().getAllLights();
         return allLights.get(lightIndex);
-    }
-
-    private int getRandomBrightness() {
-        return (int) (Math.random()*254);
     }
 
     @Override
@@ -68,7 +61,7 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onError(int i, String s) {
-        System.err.println(i + s);
+        System.err.println("Error: " + i + s);
     }
 
     @Override

@@ -2,53 +2,49 @@ package no.mop.philipshueapi.hueAPI.rest;
 
 
 import com.philips.lighting.hue.sdk.PHHueSDK;
-import com.philips.lighting.model.PHBridge;
 
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import java.util.Optional;
 
 
 @Path("/hue")
 public class WildflyEntryPoint {
 
+	private PhilipsHueController philipsHueController;
+	private PHHueSDK sdk;
+
+	public WildflyEntryPoint() {
+		philipsHueController = new PhilipsHueController();
+		sdk = PHHueSDK.getInstance();
+	}
+
 	@GET
 	@Produces("text/plain")
-	public Response doGet() {
-		final Optional<Integer>[] newBrightness = new Optional[]{Optional.empty()};
-		int lightIndex = 0;
-
-		PhilipsHueController philipsHueController = new PhilipsHueController();
-		Listener listener = createListener(newBrightness, lightIndex);
+	@Consumes("text/plain")
+	@Path("/light/{light}/brightness/{brightness}")
+	public Response doGet(@PathParam("light") int lightIndex, @PathParam("brightness") int brightness) {
+		Listener listener = new Listener(sdk);
 		philipsHueController.run(listener);
 
-		waitForListener(newBrightness[0]);
-		return Response.ok(getResponseText(lightIndex, newBrightness[0].get())).build();
+		waitUntilBridgeIsSelected();
+		listener.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
+
+		return Response.ok(getResponseText(lightIndex, brightness)).build();
 	}
 
-	private Listener createListener(Optional<Integer>[] newBrightness, int lightIndex) {
-		return new Listener(PHHueSDK.getInstance()) {
-			@Override
-			public void onConnectionResumed(PHBridge bridge) {
-				super.onConnectionResumed(bridge);
-				newBrightness[0] = Optional.of(super.switchStateOfGivenLight(bridge, lightIndex));
-			}
-		};
-	}
-
-	private void waitForListener(Optional<Integer> newBrightness) {
-		while (!newBrightness.isPresent()) {
+	private void waitUntilBridgeIsSelected() {
+		while (sdk.getSelectedBridge() == null) {
 			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
+				System.out.println("Waiting for bridgeselection");
+				Thread.sleep(200);
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private String getResponseText(int lightIndex, Integer newBrightness) {
-		return "Hello from WildFly Swarm! The new brightness of lamp " + lightIndex + " is " + newBrightness;
+		return "WildFly Swarm! The new brightness of light " + lightIndex + " is " + newBrightness;
 	}
 }
