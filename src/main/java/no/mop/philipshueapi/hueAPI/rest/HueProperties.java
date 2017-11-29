@@ -21,13 +21,13 @@ public final class HueProperties {
     private static final String LAST_CONNECTED_IP   = "LastIPAddress";
     private static final String USER_NAME           = "WhiteListUsername";
     private static final String PROPS_FILE_NAME     = "MyHue.properties";
-    private static Properties props=null;
+    private static Properties properties = null;
 
     private HueProperties() {
     }
     
     public static void storeLastIPAddress(String ipAddress) {
-        props.setProperty(LAST_CONNECTED_IP, ipAddress);
+        properties.setProperty(LAST_CONNECTED_IP, ipAddress);
         saveProperties();
     }
 
@@ -35,7 +35,7 @@ public final class HueProperties {
      * Stores the Username (for Whitelist usage). This is generated as a random 16 character string.
      */
     public static void storeUsername(String username) {
-        props.setProperty(USER_NAME, username);
+        properties.setProperty(USER_NAME, username);
         saveProperties();
     }
 
@@ -43,26 +43,28 @@ public final class HueProperties {
      * Returns the stored Whitelist username.  If it doesn't exist we generate a 16 character random string and store this in the properties file.
      */
     public static String getUsername() {
-        return props.getProperty(USER_NAME);
+        return properties.getProperty(USER_NAME);
     }
 
     public static String getLastConnectedIP() {
-        return props.getProperty(LAST_CONNECTED_IP);
+        return properties.getProperty(LAST_CONNECTED_IP);
     }
     
     public static void loadProperties() {
-        if (props==null) {
-            props=new Properties();
+        if (properties == null) {
+            properties = new Properties();
             FileInputStream in;
             
             try {
                 in = new FileInputStream(PROPS_FILE_NAME);
-                props.load(in);
+                properties.load(in);
                 in.close();
-            } catch (FileNotFoundException ex) {
+            }
+            catch (FileNotFoundException ex) {
                 saveProperties();
-            } catch (IOException e) {
-                // Handle the IOException.
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -70,14 +72,14 @@ public final class HueProperties {
     public static void saveProperties() {
         try {
             FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
-            props.store(out, null);
+            properties.store(out, null);
             out.close();
         }
         catch (FileNotFoundException e) {
-            // Handle the FileNotFoundException.
+            throw new RuntimeException(e);
         }
         catch (IOException e) {
-            // Handle the IOException.
+            throw new RuntimeException(e);
         }
     } 
 

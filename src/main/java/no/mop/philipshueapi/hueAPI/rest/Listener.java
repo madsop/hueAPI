@@ -12,13 +12,15 @@ import java.util.List;
 
 public class Listener implements PHSDKListener {
     private PHHueSDK sdk;
-    public Listener(PHHueSDK sdk) {
+
+    Listener(PHHueSDK sdk) {
         this.sdk = sdk;
     }
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-
+        print("Cache updated for " + phBridge);
+        list.stream().map(Object::toString).forEach(this::print);
     }
 
     @Override
@@ -29,17 +31,25 @@ public class Listener implements PHSDKListener {
         HueProperties.storeUsername(username);
         HueProperties.storeLastIPAddress(lastIpAddress);
         HueProperties.saveProperties();
-
-        switchStateOfFirstLight(bridge);
     }
 
-    private void switchStateOfFirstLight(PHBridge bridge) {
-        List<PHLight> allLights = bridge.getResourceCache().getAllLights();
-        allLights.forEach(System.out::println);
-        PHLight light = allLights.get(0);
+    int switchStateOfGivenLight(PHBridge bridge, int lightIndex) {
+        PHLight light = getGivenLight(bridge, lightIndex);
         PHLightState lastKnownLightState = light.getLastKnownLightState();
-        lastKnownLightState.setOn(!lastKnownLightState.isOn());
-        //bridge.updateLightState(light, lastKnownLightState);
+        int brightness = getRandomBrightness();
+        System.out.println("New brightness: " + brightness);
+        lastKnownLightState.setBrightness(brightness);
+        bridge.updateLightState(light, lastKnownLightState);
+        return brightness;
+    }
+
+    private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
+        List<PHLight> allLights = bridge.getResourceCache().getAllLights();
+        return allLights.get(lightIndex);
+    }
+
+    private int getRandomBrightness() {
+        return (int) (Math.random()*254);
     }
 
     @Override
@@ -50,13 +60,10 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onAccessPointsFound(List<PHAccessPoint> list) {
-        if (sdk.getSelectedBridge().getResourceCache().getBridgeConfiguration().getIpAddress() != null) {
-            return;
-        }
         list.stream()
-                .peek(accessPoint -> System.out.println(accessPoint.getIpAddress()))
+                .peek(accessPoint -> print("Found access point " + accessPoint.getIpAddress()))
                 .limit(1)
-                .forEach(sdk::connect);
+                .forEach(ap -> Connector.connect(sdk, ap));
     }
 
     @Override

@@ -3,12 +3,12 @@ package no.mop.philipshueapi.hueAPI.rest;
 import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHBridgeSearchManager;
 import com.philips.lighting.hue.sdk.PHHueSDK;
+import com.philips.lighting.hue.sdk.PHSDKListener;
 
 public class PhilipsHueController {
     private static final int MAX_HUE = 65535;
 
     private PHHueSDK sdk;
-    private Listener listener;
 
     PhilipsHueController() {
         sdk = PHHueSDK.create();
@@ -16,8 +16,11 @@ public class PhilipsHueController {
     }
 
     void run() {
+        run(new Listener(sdk));
+    }
+
+    void run(PHSDKListener listener) {
         connectToLastKnownAccessPoint();
-        listener = new Listener(sdk);
         sdk.getNotificationManager().registerSDKListener(listener);
         findBridges();
     }
@@ -30,14 +33,18 @@ public class PhilipsHueController {
 
     private void connectToLastKnownAccessPoint() {
         String username = HueProperties.getUsername();
-        String lastIpAddress =  HueProperties.getLastConnectedIP();
+        String lastIpAddress = HueProperties.getLastConnectedIP();
 
         if (username==null || lastIpAddress == null) {
             return;
         }
+        createAndConnectToAccessPoint(username, lastIpAddress);
+    }
+
+    private void createAndConnectToAccessPoint(String username, String lastIpAddress) {
         PHAccessPoint accessPoint = new PHAccessPoint();
         accessPoint.setIpAddress(lastIpAddress);
         accessPoint.setUsername(username);
-        sdk.connect(accessPoint);
+        Connector.connect(sdk, accessPoint);
     }
 }
