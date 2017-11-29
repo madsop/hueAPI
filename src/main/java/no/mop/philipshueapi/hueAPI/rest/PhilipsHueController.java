@@ -5,9 +5,7 @@ import com.philips.lighting.hue.sdk.wrapper.Persistence;
 import com.philips.lighting.hue.sdk.wrapper.connection.BridgeConnectionCallback;
 import com.philips.lighting.hue.sdk.wrapper.connection.BridgeStateUpdatedCallback;
 import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryCallback;
-import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryResult;
 import com.philips.lighting.hue.sdk.wrapper.domain.Bridge;
-import com.philips.lighting.hue.sdk.wrapper.domain.ReturnCode;
 import com.philips.lighting.hue.sdk.wrapper.knownbridges.KnownBridge;
 import com.philips.lighting.hue.sdk.wrapper.knownbridges.KnownBridges;
 
@@ -29,6 +27,8 @@ public class PhilipsHueController {
     private BridgeConnectionCallback bridgeConnectionCallback;
     private BridgeStateUpdatedCallback bridgeStateUpdatedCallback;
 
+    private BridgeDiscoveryCallback bridgeDiscoveryCallback;
+
     private Bridge bridge;
 
     PhilipsHueController() {
@@ -37,6 +37,7 @@ public class PhilipsHueController {
         this.lightController = new LightController();
         this.bridgeConnectionCallback = new BridgeConnectionCallbacker(() -> lightController.randomizeLights(bridge));
         this.bridgeStateUpdatedCallback = new BridgeStateUpdatedCallbacker();
+        this.bridgeDiscoveryCallback = new BridgeDiscoveryCallbacker(bridgeConnectionCallback, bridgeStateUpdatedCallback, bridgeDiscoverer, bridgeConnector, bridge -> this.bridge = bridge);
 
         // Configure the storage location and log level for the Hue SDK
         String storageLocation = Paths.get("").toAbsolutePath().toString();
@@ -83,20 +84,4 @@ public class PhilipsHueController {
         bridgeDiscoverer.startBridgeDiscovery(bridgeDiscoveryCallback);
     }
 
-    private BridgeDiscoveryCallback bridgeDiscoveryCallback = new BridgeDiscoveryCallback() {
-        @Override
-        public void onFinished(final List<BridgeDiscoveryResult> results, final ReturnCode returnCode) {
-            // Set to null to prevent stopBridgeDiscovery from stopping it
-            bridgeDiscoverer.reset();
-
-            if (returnCode == ReturnCode.SUCCESS) {
-                System.out.println("Found " + results.size() + " bridge(s) in the network.");
-                bridge = bridgeConnector.connectToBridge(results.iterator().next().getIP(), bridgeConnectionCallback, bridgeStateUpdatedCallback);
-            } else if (returnCode == ReturnCode.STOPPED) {
-                System.out.println("Bridge discovery stopped.");
-            } else {
-                System.out.println("Error doing bridge discovery: " + returnCode);
-            }
-        }
-    };
 }
