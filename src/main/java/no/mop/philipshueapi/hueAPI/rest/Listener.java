@@ -5,8 +5,6 @@ import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHHueParsingError;
-import com.philips.lighting.model.PHLight;
-import com.philips.lighting.model.PHLightState;
 
 import java.util.List;
 
@@ -30,19 +28,6 @@ public class Listener implements PHSDKListener {
         HueProperties.storeUsername(username);
         HueProperties.storeLastIPAddress(lastIpAddress);
         HueProperties.saveProperties();
-    }
-
-    void switchStateOfGivenLight(PHBridge bridge, int lightIndex, int brightness) {
-        PHLight light = getGivenLight(bridge, lightIndex);
-        PHLightState lastKnownLightState = light.getLastKnownLightState();
-        print("New brightness: " + brightness);
-        lastKnownLightState.setBrightness(brightness);
-        //bridge.updateLightState(light, lastKnownLightState);
-    }
-
-    private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
-        List<PHLight> allLights = bridge.getResourceCache().getAllLights();
-        return allLights.get(lightIndex);
     }
 
     @Override

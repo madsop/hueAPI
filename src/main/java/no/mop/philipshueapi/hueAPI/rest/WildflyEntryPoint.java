@@ -23,11 +23,10 @@ public class WildflyEntryPoint {
 	@Consumes("text/plain")
 	@Path("/light/{light}/brightness/{brightness}")
 	public Response doGet(@PathParam("light") int lightIndex, @PathParam("brightness") int brightness) {
-		Listener listener = new Listener(sdk);
-		philipsHueController.run(listener);
+		philipsHueController.run();
 
 		waitUntilBridgeIsSelected();
-		listener.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
+		philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
 
 		return Response.ok(getResponseText(lightIndex, brightness)).build();
 	}

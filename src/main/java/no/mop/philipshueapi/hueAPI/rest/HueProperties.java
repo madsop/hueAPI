@@ -49,7 +49,8 @@ public final class HueProperties {
     public static String getLastConnectedIP() {
         return properties.getProperty(LAST_CONNECTED_IP);
     }
-    
+
+    // Load in HueProperties, if first time use a properties file is created.
     public static void loadProperties() {
         if (properties == null) {
             properties = new Properties();

@@ -6,7 +6,7 @@ public class MainClass {
         start();
     }
 
-    static void start() {
+    private static void start() {
         new PhilipsHueController().run();
     }
 }
