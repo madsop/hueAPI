@@ -30,12 +30,16 @@ public class Listener implements PHSDKListener {
         HueProperties.storeLastIPAddress(lastIpAddress);
         HueProperties.saveProperties();
 
+        switchStateOfFirstLight(bridge);
+    }
+
+    private void switchStateOfFirstLight(PHBridge bridge) {
         List<PHLight> allLights = bridge.getResourceCache().getAllLights();
         allLights.forEach(System.out::println);
         PHLight light = allLights.get(0);
         PHLightState lastKnownLightState = light.getLastKnownLightState();
-        lastKnownLightState.setOn(false);
-        bridge.updateLightState(light, lastKnownLightState);
+        lastKnownLightState.setOn(!lastKnownLightState.isOn());
+        //bridge.updateLightState(light, lastKnownLightState);
     }
 
     @Override
@@ -46,7 +50,12 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onAccessPointsFound(List<PHAccessPoint> list) {
-        list.stream().peek(accessPoint -> System.out.println(accessPoint.getIpAddress())).limit(1)
+        if (sdk.getSelectedBridge().getResourceCache().getBridgeConfiguration().getIpAddress() != null) {
+            return;
+        }
+        list.stream()
+                .peek(accessPoint -> System.out.println(accessPoint.getIpAddress()))
+                .limit(1)
                 .forEach(sdk::connect);
     }
 

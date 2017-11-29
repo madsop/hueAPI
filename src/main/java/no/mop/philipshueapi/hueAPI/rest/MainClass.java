@@ -2,9 +2,11 @@ package no.mop.philipshueapi.hueAPI.rest;
 
 public class MainClass {
 
-    public static void main(String[] args) throws InterruptedException {
-      //  System.loadLibrary("huesdk");
+    public static void main(String[] args) {
+        start();
+    }
 
-        new PhilipsHueController();//.run();
+    static void start() {
+        new PhilipsHueController().run();
     }
 }

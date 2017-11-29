@@ -13,6 +13,7 @@ public class HelloWorldEndpoint {
 	@GET
 	@Produces("text/plain")
 	public Response doGet() {
+		MainClass.start();
 		return Response.ok("Hello from WildFly Swarm!").build();
 	}
 }

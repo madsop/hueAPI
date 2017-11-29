@@ -43,8 +43,7 @@ public final class HueProperties {
      * Returns the stored Whitelist username.  If it doesn't exist we generate a 16 character random string and store this in the properties file.
      */
     public static String getUsername() {
-        String username = props.getProperty(USER_NAME);        
-        return username;
+        return props.getProperty(USER_NAME);
     }
 
     public static String getLastConnectedIP() {
@@ -73,9 +72,11 @@ public final class HueProperties {
             FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
             props.store(out, null);
             out.close();
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e) {
             // Handle the FileNotFoundException.
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             // Handle the IOException.
         }
     } 
