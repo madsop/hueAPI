@@ -3,7 +3,6 @@ package no.mop.philipshueapi.hueAPI.rest;
 import com.philips.lighting.hue.sdk.wrapper.HueLog;
 import com.philips.lighting.hue.sdk.wrapper.Persistence;
 import com.philips.lighting.hue.sdk.wrapper.connection.*;
-import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscovery;
 import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryCallback;
 import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryResult;
 import com.philips.lighting.hue.sdk.wrapper.domain.*;
@@ -28,9 +27,9 @@ public class DomainLogic {
 
     private static final int MAX_HUE = 65535;
 
-    private Bridge bridge;
+    private BridgeDiscoverer bridgeDiscoverer;
 
-    private BridgeDiscovery bridgeDiscovery;
+    private Bridge bridge;
 
     private List<BridgeDiscoveryResult> bridgeDiscoveryResults;
 
@@ -40,21 +39,27 @@ public class DomainLogic {
         new DomainLogic().run();
     }
 
-    private void run() throws InterruptedException {
+    private DomainLogic() {
+        this.bridgeDiscoverer = new BridgeDiscoverer();
+
         // Configure the storage location and log level for the Hue SDK
         String storageLocation = Paths.get("").toAbsolutePath().toString();
         Persistence.setStorageLocation(storageLocation, "HueQuickStart");
         HueLog.setConsoleLogLevel(HueLog.LogLevel.INFO);
+    }
+
+    private void run() throws InterruptedException {
         // Connect to a bridge or start the bridge discovery
         String bridgeIp = getLastUsedBridgeIp();
         ExecutorService executorService = Executors.newCachedThreadPool();
         if (bridgeIp == null) {
-            executorService.execute(() -> startBridgeDiscovery());
-        } else {
+            startBridgeDiscovery();
+        }
+        else {
             connectToBridge(bridgeIp);
         }
         executorService.awaitTermination(13, TimeUnit.SECONDS);
-        randomizeLights();
+        executorService.shutdown();
     }
 
 
@@ -70,12 +75,7 @@ public class DomainLogic {
             return null;
         }
 
-        return Collections.max(bridges, new Comparator<KnownBridge>() {
-            @Override
-            public int compare(KnownBridge a, KnownBridge b) {
-                return a.getLastConnected().compareTo(b.getLastConnected());
-            }
-        }).getIpAddress();
+        return Collections.max(bridges, Comparator.comparing(KnownBridge::getLastConnected)).getIpAddress();
     }
 
     /**
@@ -85,20 +85,14 @@ public class DomainLogic {
     private void startBridgeDiscovery() {
         disconnectFromBridge();
 
-        bridgeDiscovery = new BridgeDiscovery();
-        bridgeDiscovery.search(BridgeDiscovery.BridgeDiscoveryOption.UPNP, bridgeDiscoveryCallback);
-
-        System.out.println("Scanning the network for hue bridges...");
+        bridgeDiscoverer.startBridgeDiscovery(bridgeDiscoveryCallback);
     }
 
     /**
      * Stops the bridge discovery if it is still running
      */
     private void stopBridgeDiscovery() {
-        if (bridgeDiscovery != null) {
-            bridgeDiscovery.stop();
-            bridgeDiscovery = null;
-        }
+        bridgeDiscoverer.stopBridgeDiscovery();
     }
 
     /**
@@ -169,7 +163,7 @@ public class DomainLogic {
         @Override
         public void onFinished(final List<BridgeDiscoveryResult> results, final ReturnCode returnCode) {
             // Set to null to prevent stopBridgeDiscovery from stopping it
-            bridgeDiscovery = null;
+            bridgeDiscoverer.reset();
 
             if (returnCode == ReturnCode.SUCCESS) {
                 bridgeDiscoveryResults = results;
