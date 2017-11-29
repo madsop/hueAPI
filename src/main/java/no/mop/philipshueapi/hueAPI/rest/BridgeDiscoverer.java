@@ -5,7 +5,7 @@ import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryCallback;
 
 public class BridgeDiscoverer {
 
-    BridgeDiscovery bridgeDiscovery;
+    private BridgeDiscovery bridgeDiscovery;
 
     public void startBridgeDiscovery(BridgeDiscoveryCallback bridgeDiscoveryCallback) {
         bridgeDiscovery = new BridgeDiscovery();

@@ -5,10 +5,9 @@ import com.philips.lighting.hue.sdk.wrapper.Persistence;
 import com.philips.lighting.hue.sdk.wrapper.connection.*;
 import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryCallback;
 import com.philips.lighting.hue.sdk.wrapper.discovery.BridgeDiscoveryResult;
-import com.philips.lighting.hue.sdk.wrapper.domain.*;
-import com.philips.lighting.hue.sdk.wrapper.domain.clip.ClipResponse;
-import com.philips.lighting.hue.sdk.wrapper.domain.device.light.LightPoint;
-import com.philips.lighting.hue.sdk.wrapper.domain.device.light.LightState;
+import com.philips.lighting.hue.sdk.wrapper.domain.Bridge;
+import com.philips.lighting.hue.sdk.wrapper.domain.HueError;
+import com.philips.lighting.hue.sdk.wrapper.domain.ReturnCode;
 import com.philips.lighting.hue.sdk.wrapper.knownbridges.KnownBridge;
 import com.philips.lighting.hue.sdk.wrapper.knownbridges.KnownBridges;
 
@@ -16,24 +15,22 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DomainLogic {
-
-    private static final String TAG = "HueQuickStartApp";
-
     private static final int MAX_HUE = 65535;
 
     private BridgeDiscoverer bridgeDiscoverer;
 
+    private BridgeConnector bridgeConnector;
+
+    private LightController lightController;
+
     private Bridge bridge;
 
-    private List<BridgeDiscoveryResult> bridgeDiscoveryResults;
-
-    public static void main(String... args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         System.loadLibrary("huesdk");
 
         new DomainLogic().run();
@@ -41,6 +38,8 @@ public class DomainLogic {
 
     private DomainLogic() {
         this.bridgeDiscoverer = new BridgeDiscoverer();
+        this.bridgeConnector = new BridgeConnector(bridgeDiscoverer);
+        this.lightController = new LightController();
 
         // Configure the storage location and log level for the Hue SDK
         String storageLocation = Paths.get("").toAbsolutePath().toString();
@@ -56,7 +55,7 @@ public class DomainLogic {
             startBridgeDiscovery();
         }
         else {
-            connectToBridge(bridgeIp);
+            bridge = bridgeConnector.connectToBridge(bridgeIp, bridgeConnectionCallback, bridgeStateUpdatedCallback);
         }
         executorService.awaitTermination(13, TimeUnit.SECONDS);
         executorService.shutdown();
@@ -68,7 +67,6 @@ public class DomainLogic {
      * @return Ip address of the last connected bridge, or null
      */
     private String getLastUsedBridgeIp() {
-        KnownBridges kb = new KnownBridges();
         List<KnownBridge> bridges = KnownBridges.getAll();
 
         if (bridges.isEmpty()) {
@@ -83,82 +81,11 @@ public class DomainLogic {
      * Read the documentation on meethue for an explanation of the bridge discovery options
      */
     private void startBridgeDiscovery() {
-        disconnectFromBridge();
+        bridge = bridgeConnector.disconnectFromBridge();
 
         bridgeDiscoverer.startBridgeDiscovery(bridgeDiscoveryCallback);
     }
 
-    /**
-     * Stops the bridge discovery if it is still running
-     */
-    private void stopBridgeDiscovery() {
-        bridgeDiscoverer.stopBridgeDiscovery();
-    }
-
-    /**
-     * Disconnect a bridge
-     * The hue SDK supports multiple bridge connections at the same time,
-     * but for the purposes of this demo we only connect to one bridge at a time.
-     */
-    private void disconnectFromBridge() {
-        if (bridge != null) {
-            bridge.disconnect();
-            bridge = null;
-        }
-    }
-
-    /**
-     * Use the BridgeBuilder to create a bridge instance and connect to it
-     */
-    private void connectToBridge(String bridgeIp) {
-        stopBridgeDiscovery();
-        disconnectFromBridge();
-
-        bridge = new BridgeBuilder("app name", "device name")
-                .setIpAddress(bridgeIp)
-                .setConnectionType(BridgeConnectionType.LOCAL)
-                .setBridgeConnectionCallback(bridgeConnectionCallback)
-                .addBridgeStateUpdatedCallback(bridgeStateUpdatedCallback)
-                .build();
-
-        bridge.connect();
-
-        System.out.println("Bridge IP: " + bridgeIp);
-        System.out.println("Connecting to bridge...");
-    }
-
-    /**
-     * Randomize the color of all lights in the bridge
-     * The SDK contains an internal processing queue that automatically throttles
-     * the rate of requests sent to the bridge, therefore it is safe to
-     * perform all light operations at once, even if there are dozens of lights.
-     */
-    private void randomizeLights() {
-        BridgeState bridgeState = bridge.getBridgeState();
-        List<LightPoint> lights = bridgeState.getLights();
-
-        Random rand = new Random();
-
-        for (final LightPoint light : lights) {
-            final LightState lightState = new LightState();
-
-            //lightState.setHue(rand.nextInt(MAX_HUE));
-
-            light.updateState(lightState, BridgeConnectionType.LOCAL, new BridgeResponseCallback() {
-                @Override
-                public void handleCallback(Bridge bridge, ReturnCode returnCode, List<ClipResponse> list, List<HueError> errorList) {
-                    if (returnCode == ReturnCode.SUCCESS) {
-                        System.out.println("Changed hue of light " + light.getIdentifier() + " to " + lightState.getHue());
-                    } else {
-                        System.err.println("Error changing hue of light " + light.getIdentifier());
-                        for (HueError error : errorList) {
-                            System.err.println(error.toString());
-                        }
-                    }
-                }
-            });
-        }
-    }
     private BridgeDiscoveryCallback bridgeDiscoveryCallback = new BridgeDiscoveryCallback() {
         @Override
         public void onFinished(final List<BridgeDiscoveryResult> results, final ReturnCode returnCode) {
@@ -166,9 +93,8 @@ public class DomainLogic {
             bridgeDiscoverer.reset();
 
             if (returnCode == ReturnCode.SUCCESS) {
-                bridgeDiscoveryResults = results;
                 System.out.println("Found " + results.size() + " bridge(s) in the network.");
-                connectToBridge(bridgeDiscoveryResults.iterator().next().getIP());
+                bridge = bridgeConnector.connectToBridge(results.iterator().next().getIP(), bridgeConnectionCallback, bridgeStateUpdatedCallback);
             } else if (returnCode == ReturnCode.STOPPED) {
                 System.out.println("Bridge discovery stopped.");
             } else {
@@ -207,7 +133,7 @@ public class DomainLogic {
                     // User-initiated disconnection.
                     break;
                 case CONNECTED:
-                    randomizeLights();
+                    lightController.randomizeLights(bridge);
                     break;
                 default:
                     break;
