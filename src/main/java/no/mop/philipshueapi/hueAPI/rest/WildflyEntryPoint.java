@@ -31,6 +31,18 @@ public class WildflyEntryPoint {
 		return Response.ok(getResponseText(lightIndex, brightness)).build();
 	}
 
+	@GET
+	@Produces("text/plain")
+	@Consumes("text/plain")
+	@Path("/lights")
+	public Response getNumberOfLights() {
+		philipsHueController.run();
+		waitUntilBridgeIsSelected();
+
+		String responseText = philipsHueController.getNumberOfLights() + "";
+		return Response.ok(responseText).build();
+	}
+
 	private void waitUntilBridgeIsSelected() {
 		while (sdk.getSelectedBridge() == null) {
 			try {

@@ -41,4 +41,8 @@ public class PhilipsHueController {
     private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
         return bridge.getResourceCache().getAllLights().get(lightIndex);
     }
+
+    public int getNumberOfLights() {
+        return sdk.getSelectedBridge().getResourceCache().getAllLights().size();
+    }
 }
