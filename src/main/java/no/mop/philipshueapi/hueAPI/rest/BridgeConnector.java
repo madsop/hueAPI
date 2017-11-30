@@ -4,17 +4,24 @@ import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHBridgeSearchManager;
 import com.philips.lighting.hue.sdk.PHHueSDK;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+@ApplicationScoped
 public class BridgeConnector {
 
-    private PHHueSDK sdk;
+    @Inject
+    private SDKFacade sdk;
 
-    BridgeConnector(PHHueSDK sdk) {
-        this.sdk = sdk;
-    }
+    @Inject
+    private HueProperties hueProperties;
+
+    @Inject
+    private Connector connector;
 
     void connectToLastKnownAccessPoint() {
-        String username = HueProperties.getUsername();
-        String lastIpAddress = HueProperties.getLastConnectedIP();
+        String username = hueProperties.getUsername();
+        String lastIpAddress = hueProperties.getLastConnectedIP();
 
         if (username==null || lastIpAddress == null) {
             return;
@@ -26,7 +33,7 @@ public class BridgeConnector {
         PHAccessPoint accessPoint = new PHAccessPoint();
         accessPoint.setIpAddress(lastIpAddress);
         accessPoint.setUsername(username);
-        Connector.connect(sdk, accessPoint);
+        connector.connect(sdk, accessPoint);
     }
 
     void findBridges() {

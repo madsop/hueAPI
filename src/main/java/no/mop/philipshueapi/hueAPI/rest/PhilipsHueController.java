@@ -1,25 +1,36 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
-import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 
-import java.util.function.Supplier;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+@ApplicationScoped
 public class PhilipsHueController {
-    private PHHueSDK sdk;
+
+    @Inject
+    private SDKFacade sdk;
+
+    @Inject
     private BridgeConnector bridgeConnector;
 
-    PhilipsHueController(Supplier<PHHueSDK> sdkSupplier) {
-        sdk = sdkSupplier.get();
-        HueProperties.loadProperties();
-        this.bridgeConnector = new BridgeConnector(sdk);
+    @Inject
+    private HueProperties hueProperties;
+
+    @Inject
+    private Listener listener;
+
+    @PostConstruct
+    public void setUp() {
+        hueProperties.loadProperties();
     }
 
     void run() {
         bridgeConnector.connectToLastKnownAccessPoint();
-        sdk.getNotificationManager().registerSDKListener(new Listener(sdk));
+        sdk.getNotificationManager().registerSDKListener(listener);
         bridgeConnector.findBridges();
     }
 

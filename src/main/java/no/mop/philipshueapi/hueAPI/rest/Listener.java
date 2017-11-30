@@ -6,14 +6,21 @@ import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHHueParsingError;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.List;
 
+@ApplicationScoped
 public class Listener implements PHSDKListener {
-    private PHHueSDK sdk;
 
-    Listener(PHHueSDK sdk) {
-        this.sdk = sdk;
-    }
+    @Inject
+    private SDKFacade sdk;
+
+    @Inject
+    private HueProperties hueProperties;
+
+    @Inject
+    private Connector connector;
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
@@ -25,9 +32,9 @@ public class Listener implements PHSDKListener {
         sdk.setSelectedBridge(bridge);
         sdk.enableHeartbeat(bridge, PHHueSDK.HB_INTERVAL);
         String lastIpAddress =  bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
-        HueProperties.storeUsername(username);
-        HueProperties.storeLastIPAddress(lastIpAddress);
-        HueProperties.saveProperties();
+        hueProperties.storeUsername(username);
+        hueProperties.storeLastIPAddress(lastIpAddress);
+        hueProperties.saveProperties();
     }
 
     @Override
@@ -41,7 +48,7 @@ public class Listener implements PHSDKListener {
         list.stream()
                 .peek(accessPoint -> print("Found access point " + accessPoint.getIpAddress()))
                 .limit(1)
-                .forEach(ap -> Connector.connect(sdk, ap));
+                .forEach(ap -> connector.connect(sdk, ap));
     }
 
     @Override

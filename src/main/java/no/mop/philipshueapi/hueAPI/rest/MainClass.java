@@ -1,14 +1,17 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
-import com.philips.lighting.hue.sdk.PHHueSDK;
+import javax.inject.Inject;
 
 public class MainClass {
 
+    @Inject
+    private PhilipsHueController philipsHueController;
+
     public static void main(String[] args) {
-        start();
+        new MainClass().start();
     }
 
-    private static void start() {
-        new PhilipsHueController(PHHueSDK::create).run();
+    private void start() {
+        philipsHueController.run();
     }
 }

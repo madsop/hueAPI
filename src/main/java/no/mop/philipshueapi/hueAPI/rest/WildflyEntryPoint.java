@@ -1,8 +1,7 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
 
-import com.philips.lighting.hue.sdk.PHHueSDK;
-
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -10,13 +9,11 @@ import javax.ws.rs.core.Response;
 @Path("/hue")
 public class WildflyEntryPoint {
 
+	@Inject
 	private PhilipsHueController philipsHueController;
-	private PHHueSDK sdk;
 
-	public WildflyEntryPoint() {
-		sdk = PHHueSDK.create();
-		philipsHueController = new PhilipsHueController(() -> sdk);
-	}
+	@Inject
+	private SDKFacade sdk;
 
 	@GET
 	@Produces("text/plain")

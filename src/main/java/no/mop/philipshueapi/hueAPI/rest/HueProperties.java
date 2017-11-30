@@ -1,5 +1,6 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
+import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,17 +18,16 @@ import java.util.Properties;
  * pushlink every time the app is started (as the username is read from the properties file).
  *
  */
-public final class HueProperties {
 
-    private static final String LAST_CONNECTED_IP   = "LastIPAddress";
-    private static final String USER_NAME           = "WhiteListUsername";
-    private static final String PROPS_FILE_NAME     = "MyHue.properties";
-    private static Properties properties = null;
+@Singleton
+public class HueProperties {
 
-    private HueProperties() {
-    }
+    private final String LAST_CONNECTED_IP   = "LastIPAddress";
+    private final String USER_NAME           = "WhiteListUsername";
+    private final String PROPS_FILE_NAME     = "MyHue.properties";
+    private Properties properties = null;
     
-    public static void storeLastIPAddress(String ipAddress) {
+    public void storeLastIPAddress(String ipAddress) {
         properties.setProperty(LAST_CONNECTED_IP, ipAddress);
         saveProperties();
     }
@@ -35,7 +35,7 @@ public final class HueProperties {
     /**
      * Stores the Username (for Whitelist usage). This is generated as a random 16 character string.
      */
-    public static void storeUsername(String username) {
+    public void storeUsername(String username) {
         properties.setProperty(USER_NAME, username);
         saveProperties();
     }
@@ -43,16 +43,16 @@ public final class HueProperties {
     /**
      * Returns the stored Whitelist username.  If it doesn't exist we generate a 16 character random string and store this in the properties file.
      */
-    public static String getUsername() {
+    public String getUsername() {
         return properties.getProperty(USER_NAME);
     }
 
-    public static String getLastConnectedIP() {
+    public String getLastConnectedIP() {
         return properties.getProperty(LAST_CONNECTED_IP);
     }
 
     // Load in HueProperties, if first time use a properties file is created.
-    public static void loadProperties() {
+    public void loadProperties() {
         if (properties == null) {
             properties = new Properties();
 
@@ -72,7 +72,7 @@ public final class HueProperties {
         }
     }
 
-    public static void saveProperties() {
+    public void saveProperties() {
         try {
             FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
             properties.store(out, null);
