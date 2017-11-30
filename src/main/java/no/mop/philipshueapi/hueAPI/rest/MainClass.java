@@ -1,5 +1,7 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
+import com.philips.lighting.hue.sdk.PHHueSDK;
+
 public class MainClass {
 
     public static void main(String[] args) {
@@ -7,6 +9,6 @@ public class MainClass {
     }
 
     private static void start() {
-        new PhilipsHueController().run();
+        new PhilipsHueController(PHHueSDK::create).run();
     }
 }

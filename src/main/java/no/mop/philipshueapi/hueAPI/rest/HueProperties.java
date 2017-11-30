@@ -1,9 +1,10 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -54,15 +55,16 @@ public final class HueProperties {
     public static void loadProperties() {
         if (properties == null) {
             properties = new Properties();
-            FileInputStream in;
+
+            if (!Files.exists(Paths.get(PROPS_FILE_NAME))) {
+                saveProperties();
+                return;
+            }
             
             try {
-                in = new FileInputStream(PROPS_FILE_NAME);
+                FileInputStream in = new FileInputStream(PROPS_FILE_NAME);
                 properties.load(in);
                 in.close();
-            }
-            catch (FileNotFoundException ex) {
-                saveProperties();
             }
             catch (IOException e) {
                 throw new RuntimeException(e);
@@ -75,9 +77,6 @@ public final class HueProperties {
             FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
             properties.store(out, null);
             out.close();
-        }
-        catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         }
         catch (IOException e) {
             throw new RuntimeException(e);

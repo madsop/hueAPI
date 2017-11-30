@@ -14,8 +14,8 @@ public class WildflyEntryPoint {
 	private PHHueSDK sdk;
 
 	public WildflyEntryPoint() {
-		philipsHueController = new PhilipsHueController();
-		sdk = PHHueSDK.getInstance();
+		sdk = PHHueSDK.create();
+		philipsHueController = new PhilipsHueController(() -> sdk);
 	}
 
 	@GET

@@ -5,14 +5,14 @@ import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 
-import java.util.List;
+import java.util.function.Supplier;
 
 public class PhilipsHueController {
     private PHHueSDK sdk;
     private BridgeConnector bridgeConnector;
 
-    PhilipsHueController() {
-        sdk = PHHueSDK.create();
+    PhilipsHueController(Supplier<PHHueSDK> sdkSupplier) {
+        sdk = sdkSupplier.get();
         HueProperties.loadProperties();
         this.bridgeConnector = new BridgeConnector(sdk);
     }
@@ -32,7 +32,6 @@ public class PhilipsHueController {
     }
 
     private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
-        List<PHLight> allLights = bridge.getResourceCache().getAllLights();
-        return allLights.get(lightIndex);
+        return bridge.getResourceCache().getAllLights().get(lightIndex);
     }
 }
