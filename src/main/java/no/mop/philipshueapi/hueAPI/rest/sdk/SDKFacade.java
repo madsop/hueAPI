@@ -1,4 +1,4 @@
-package no.mop.philipshueapi.hueAPI.rest;
+package no.mop.philipshueapi.hueAPI.rest.sdk;
 
 import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHHueSDK;

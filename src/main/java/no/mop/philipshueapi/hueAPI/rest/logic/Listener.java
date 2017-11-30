@@ -1,17 +1,19 @@
-package no.mop.philipshueapi.hueAPI.rest;
+package no.mop.philipshueapi.hueAPI.rest.logic;
 
 import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHHueParsingError;
+import no.mop.philipshueapi.hueAPI.rest.HueProperties;
+import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 
 @ApplicationScoped
-public class Listener implements PHSDKListener {
+class Listener implements PHSDKListener {
 
     @Inject
     private SDKFacade sdk;

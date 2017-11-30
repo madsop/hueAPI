@@ -1,5 +1,6 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,13 +26,17 @@ public class HueProperties {
     private final String LAST_CONNECTED_IP   = "LastIPAddress";
     private final String USER_NAME           = "WhiteListUsername";
     private final String PROPS_FILE_NAME     = "MyHue.properties";
-    private Properties properties = null;
+    private Properties properties;
     
     private void storeLastIPAddress(String ipAddress) {
         properties.setProperty(LAST_CONNECTED_IP, ipAddress);
         saveProperties();
     }
 
+    @PostConstruct
+    public void setUp() {
+        loadProperties();
+    }
     /**
      * Stores the Username (for Whitelist usage). This is generated as a random 16 character string.
      */
@@ -52,7 +57,7 @@ public class HueProperties {
     }
 
     // Load in HueProperties, if first time use a properties file is created.
-    public void loadProperties() {
+    private void loadProperties() {
         if (properties == null) {
             properties = new Properties();
 
@@ -66,8 +71,7 @@ public class HueProperties {
     }
 
     private void loadPropertiesFromFile() {
-        try {
-            FileInputStream in = new FileInputStream(PROPS_FILE_NAME);
+        try(FileInputStream in = new FileInputStream(PROPS_FILE_NAME)) {
             properties.load(in);
             in.close();
         }
@@ -77,8 +81,7 @@ public class HueProperties {
     }
 
     private void saveProperties() {
-        try {
-            FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
+        try(FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME)) {
             properties.store(out, null);
             out.close();
         }
@@ -87,7 +90,7 @@ public class HueProperties {
         }
     }
 
-    void storeConnectionData(String username, String lastIpAddress) {
+    public void storeConnectionData(String username, String lastIpAddress) {
         storeUsername(username);
         storeLastIPAddress(lastIpAddress);
         saveProperties();

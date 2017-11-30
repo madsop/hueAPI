@@ -1,5 +1,7 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
+import no.mop.philipshueapi.hueAPI.rest.logic.PhilipsHueController;
+
 import javax.inject.Inject;
 
 public class MainClass {

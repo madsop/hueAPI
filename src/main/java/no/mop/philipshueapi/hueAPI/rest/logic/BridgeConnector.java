@@ -1,4 +1,4 @@
-package no.mop.philipshueapi.hueAPI.rest;
+package no.mop.philipshueapi.hueAPI.rest.logic;
 
 import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHBridgeSearchManager;
@@ -6,13 +6,15 @@ import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHBridgeConfiguration;
 import com.philips.lighting.model.PHBridgeResourcesCache;
+import no.mop.philipshueapi.hueAPI.rest.HueProperties;
+import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Optional;
 
 @ApplicationScoped
-public class BridgeConnector {
+class BridgeConnector {
 
     @Inject
     private SDKFacade sdk;

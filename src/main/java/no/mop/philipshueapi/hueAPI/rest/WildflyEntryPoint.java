@@ -1,6 +1,9 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
 
+import no.mop.philipshueapi.hueAPI.rest.logic.PhilipsHueController;
+import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
+
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
