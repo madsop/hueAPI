@@ -13,28 +13,35 @@ import javax.inject.Inject;
 import java.util.List;
 
 @ApplicationScoped
+
 class Listener implements PHSDKListener {
 
+    @SuppressWarnings("unused")
     @Inject
     private SDKFacade sdk;
 
+    @SuppressWarnings("unused")
     @Inject
     private HueProperties hueProperties;
 
+    @SuppressWarnings("unused")
     @Inject
     private BridgeConnector bridgeConnector;
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-        print("Cache updated for " + phBridge.getResourceCache().getBridgeConfiguration().getIpAddress());
+        print("Cache updated for " + getLastIpAddress(phBridge));
     }
 
     @Override
     public void onBridgeConnected(PHBridge bridge, String username) {
         sdk.setSelectedBridge(bridge);
         sdk.enableHeartbeat(bridge, PHHueSDK.HB_INTERVAL);
-        String lastIpAddress = bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
-        hueProperties.storeConnectionData(username, lastIpAddress);
+        hueProperties.storeConnectionData(username, getLastIpAddress(bridge));
+    }
+
+    private String getLastIpAddress(PHBridge bridge) {
+        return bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
     }
 
     @Override
@@ -61,10 +68,6 @@ class Listener implements PHSDKListener {
         print("Connection resumed");
     }
 
-    private void print(String text) {
-        System.out.println(text);
-    }
-
     @Override
     public void onConnectionLost(PHAccessPoint accessPoint) {
         print("Lost connection to " + accessPoint);
@@ -73,5 +76,9 @@ class Listener implements PHSDKListener {
     @Override
     public void onParsingErrors(List<PHHueParsingError> list) {
         list.forEach(System.err::println);
+    }
+
+    private void print(String text) {
+        System.out.println(text);
     }
 }

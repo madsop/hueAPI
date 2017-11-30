@@ -10,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 @ApplicationScoped
+@SuppressWarnings("unused")
 public class PhilipsHueController {
 
     @Inject

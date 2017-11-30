@@ -16,9 +16,11 @@ import java.util.Optional;
 @ApplicationScoped
 class BridgeConnector {
 
+    @SuppressWarnings("unused")
     @Inject
     private SDKFacade sdk;
 
+    @SuppressWarnings("unused")
     @Inject
     private HueProperties hueProperties;
 

@@ -12,9 +12,11 @@ import javax.ws.rs.core.Response;
 @Path("/hue")
 public class WildflyEntryPoint {
 
+	@SuppressWarnings("unused")
 	@Inject
 	private PhilipsHueController philipsHueController;
 
+	@SuppressWarnings("unused")
 	@Inject
 	private SDKFacade sdk;
 
@@ -22,7 +24,7 @@ public class WildflyEntryPoint {
 	@Produces("text/plain")
 	@Consumes("text/plain")
 	@Path("/light/{light}/brightness/{brightness}")
-	public Response doGet(@PathParam("light") int lightIndex, @PathParam("brightness") int brightness) {
+	public Response switchStateOfLight(@PathParam("light") int lightIndex, @PathParam("brightness") int brightness) {
 		philipsHueController.run();
 
 		waitUntilBridgeIsSelected();
