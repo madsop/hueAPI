@@ -1,6 +1,6 @@
 package no.mop.philipshueapi.hueAPI.rest;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Properties;
  *
  */
 
-@Singleton
+@ApplicationScoped
 public class HueProperties {
 
     private final String LAST_CONNECTED_IP   = "LastIPAddress";
@@ -27,7 +27,7 @@ public class HueProperties {
     private final String PROPS_FILE_NAME     = "MyHue.properties";
     private Properties properties = null;
     
-    public void storeLastIPAddress(String ipAddress) {
+    private void storeLastIPAddress(String ipAddress) {
         properties.setProperty(LAST_CONNECTED_IP, ipAddress);
         saveProperties();
     }
@@ -35,7 +35,7 @@ public class HueProperties {
     /**
      * Stores the Username (for Whitelist usage). This is generated as a random 16 character string.
      */
-    public void storeUsername(String username) {
+    private void storeUsername(String username) {
         properties.setProperty(USER_NAME, username);
         saveProperties();
     }
@@ -60,19 +60,23 @@ public class HueProperties {
                 saveProperties();
                 return;
             }
-            
-            try {
-                FileInputStream in = new FileInputStream(PROPS_FILE_NAME);
-                properties.load(in);
-                in.close();
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
+            loadPropertiesFromFile();
         }
     }
 
-    public void saveProperties() {
+    private void loadPropertiesFromFile() {
+        try {
+            FileInputStream in = new FileInputStream(PROPS_FILE_NAME);
+            properties.load(in);
+            in.close();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveProperties() {
         try {
             FileOutputStream out = new FileOutputStream(PROPS_FILE_NAME);
             properties.store(out, null);
@@ -81,6 +85,11 @@ public class HueProperties {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-    } 
+    }
 
+    void storeConnectionData(String username, String lastIpAddress) {
+        storeUsername(username);
+        storeLastIPAddress(lastIpAddress);
+        saveProperties();
+    }
 }

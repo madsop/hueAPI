@@ -20,7 +20,7 @@ public class Listener implements PHSDKListener {
     private HueProperties hueProperties;
 
     @Inject
-    private Connector connector;
+    private BridgeConnector bridgeConnector;
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
@@ -31,10 +31,8 @@ public class Listener implements PHSDKListener {
     public void onBridgeConnected(PHBridge bridge, String username) {
         sdk.setSelectedBridge(bridge);
         sdk.enableHeartbeat(bridge, PHHueSDK.HB_INTERVAL);
-        String lastIpAddress =  bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
-        hueProperties.storeUsername(username);
-        hueProperties.storeLastIPAddress(lastIpAddress);
-        hueProperties.saveProperties();
+        String lastIpAddress = bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
+        hueProperties.storeConnectionData(username, lastIpAddress);
     }
 
     @Override
@@ -48,7 +46,7 @@ public class Listener implements PHSDKListener {
         list.stream()
                 .peek(accessPoint -> print("Found access point " + accessPoint.getIpAddress()))
                 .limit(1)
-                .forEach(ap -> connector.connect(sdk, ap));
+                .forEach(bridgeConnector::connect);
     }
 
     @Override
