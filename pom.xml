@@ -42,7 +42,11 @@
         <groupId>org.wildfly.swarm</groupId>
         <artifactId>wildfly-swarm-plugin</artifactId>
         <version>${version.wildfly.swarm}</version>
-        
+        <configuration>
+          <arguments>
+              <argument>-Djava.net.preferIPv4Stack=true</argument>
+          </arguments>
+        </configuration>
         <executions>
           <execution>
             <goals>
