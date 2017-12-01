@@ -18,9 +18,11 @@ WORKDIR /hue
 # expose port 8080
 EXPOSE 8080
 
-# install and run
-RUN mvn wildfly-swarm:run
+# install
+RUN mvn clean install
 
+ADD /target/demo-swarm.jar demo-swarm.jar
 
-# run ng serve on localhost
-#CMD ["ng","serve", "--host", "0.0.0.0", "--disable-host-check"]
+# run
+ENTRYPOINT ["java", "-jar", "demo-swarm.jar"]
+CMD ["-Djava.net.preferIPv4Stack=true"]
