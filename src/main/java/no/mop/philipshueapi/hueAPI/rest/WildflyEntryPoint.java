@@ -28,9 +28,20 @@ public class WildflyEntryPoint {
 		philipsHueController.run();
 
 		waitUntilBridgeIsSelected();
-		philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
+		try {
+			philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
 
-		return Response.ok(getResponseText(lightIndex, brightness)).build();
+			return Response.ok(getResponseText(lightIndex, brightness)).build();
+		}
+		catch (HueAPIException e) {
+			logException(e);
+			return Response.ok(e.getMessage()).build();
+		}
+	}
+
+	private void logException(HueAPIException e) {
+		System.err.println(e.getMessage());
+		e.printStackTrace();
 	}
 
 	@GET

@@ -30,7 +30,7 @@ class Listener implements PHSDKListener {
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-        print("Cache updated for " + getLastIpAddress(phBridge));
+        finePrint("Cache updated for " + getLastIpAddress(phBridge));
     }
 
     @Override
@@ -53,7 +53,7 @@ class Listener implements PHSDKListener {
     @Override
     public void onAccessPointsFound(List<PHAccessPoint> list) {
         list.stream()
-                .peek(accessPoint -> print("Found access point " + accessPoint.getIpAddress()))
+                .peek(accessPoint -> finePrint("Found access point " + accessPoint.getIpAddress()))
                 .limit(1)
                 .forEach(bridgeConnector::connect);
     }
@@ -65,7 +65,11 @@ class Listener implements PHSDKListener {
 
     @Override
     public void onConnectionResumed(PHBridge phBridge) {
-        print("Connection resumed");
+        finePrint("Connection resumed");
+    }
+
+    private void finePrint(String message) {
+        // Eventually consider to introduce logger.fine here
     }
 
     @Override

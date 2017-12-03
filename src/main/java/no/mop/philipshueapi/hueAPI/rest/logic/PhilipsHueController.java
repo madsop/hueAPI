@@ -3,6 +3,7 @@ package no.mop.philipshueapi.hueAPI.rest.logic;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
+import no.mop.philipshueapi.hueAPI.rest.HueAPIException;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
@@ -41,8 +42,7 @@ public class PhilipsHueController {
         PHLight light = getGivenLight(bridge, lightIndex);
         PHLightState lastKnownLightState = light.getLastKnownLightState();
         if (!lastKnownLightState.isReachable()) {
-            System.err.println("Light " + lightIndex + " is not reachable.");
-            return;
+            throw new HueAPIException("Light " + lightIndex + " is not reachable.");
         }
         System.out.println("New brightness: " + brightness);
         lastKnownLightState.setBrightness(brightness);
