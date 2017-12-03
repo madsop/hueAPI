@@ -6,6 +6,7 @@ import com.philips.lighting.model.PHLightState;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -25,6 +26,11 @@ public class PhilipsHueController {
     @Inject
     private Listener listener;
 
+    @PreDestroy
+    public void tearDown() {
+        sdk.getNotificationManager().unregisterSDKListener(listener);
+    }
+
     public void run() {
         bridgeConnector.connectToLastKnownAccessPoint();
         sdk.getNotificationManager().registerSDKListener(listener);
@@ -34,12 +40,16 @@ public class PhilipsHueController {
     public void switchStateOfGivenLight(PHBridge bridge, int lightIndex, int brightness) {
         PHLight light = getGivenLight(bridge, lightIndex);
         PHLightState lastKnownLightState = light.getLastKnownLightState();
+        if (!lastKnownLightState.isReachable()) {
+            System.err.println("Light " + lightIndex + " is not reachable.");
+            return;
+        }
         System.out.println("New brightness: " + brightness);
         lastKnownLightState.setBrightness(brightness);
         //bridge.updateLightState(light, lastKnownLightState);
     }
 
-    private PHLight getGivenLight(PHBridge bridge, int lightIndex) {
+    PHLight getGivenLight(PHBridge bridge, int lightIndex) {
         return bridge.getResourceCache().getAllLights().get(lightIndex);
     }
 
