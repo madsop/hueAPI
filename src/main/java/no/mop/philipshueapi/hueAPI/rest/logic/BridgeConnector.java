@@ -61,4 +61,13 @@ class BridgeConnector {
                 .map(PHBridgeConfiguration::getIpAddress);
     }
 
+    public void onBridgeConnected(PHBridge bridge, String username) {
+        sdk.setSelectedBridge(bridge);
+        sdk.enableHeartbeat(bridge, PHHueSDK.HB_INTERVAL);
+        hueProperties.storeConnectionData(username, getLastIpAddress(bridge));
+    }
+
+    String getLastIpAddress(PHBridge bridge) {
+        return bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
+    }
 }

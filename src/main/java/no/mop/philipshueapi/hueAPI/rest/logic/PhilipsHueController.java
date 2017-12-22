@@ -5,9 +5,9 @@ import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 import no.mop.philipshueapi.hueAPI.rest.HueAPIException;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
+import no.mop.philipshueapi.hueAPI.rest.sdk.NotificationManagerAdapter;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -25,16 +25,11 @@ public class PhilipsHueController {
     private HueProperties hueProperties;
 
     @Inject
-    private Listener listener;
-
-    @PreDestroy
-    public void tearDown() {
-        sdk.getNotificationManager().unregisterSDKListener(listener);
-    }
+    private NotificationManagerAdapter notificationManagerAdapter;
 
     public void run() {
         bridgeConnector.connectToLastKnownAccessPoint();
-        sdk.getNotificationManager().registerSDKListener(listener);
+        notificationManagerAdapter.registerSDKListener();
         bridgeConnector.findBridges();
     }
 
