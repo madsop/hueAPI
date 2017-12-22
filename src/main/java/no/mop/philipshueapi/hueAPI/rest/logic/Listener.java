@@ -54,7 +54,7 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onError(int i, String s) {
-        System.err.println("Error: " + i + s);
+        logger.error(i, s);
     }
 
     @Override

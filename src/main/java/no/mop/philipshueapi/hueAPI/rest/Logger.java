@@ -23,4 +23,8 @@ public class Logger {
     public void fine(String message) {
 
     }
+
+    public void error(int lightIndex, String message) {
+        System.err.println("Error: " + lightIndex + ": " + message);
+    }
 }
