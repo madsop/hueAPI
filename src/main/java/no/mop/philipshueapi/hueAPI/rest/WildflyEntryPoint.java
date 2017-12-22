@@ -25,7 +25,7 @@ public class WildflyEntryPoint {
 	@Consumes("text/plain")
 	@Path("/light/{light}/brightness/{brightness}")
 	public Response switchStateOfLight(@PathParam("light") int lightIndex, @PathParam("brightness") int brightness) {
-		philipsHueController.run();
+		philipsHueController.setup();
 
 		waitUntilBridgeIsSelected();
 		try {
@@ -49,7 +49,7 @@ public class WildflyEntryPoint {
 	@Consumes("text/plain")
 	@Path("/lights")
 	public Response getNumberOfLights() {
-		philipsHueController.run();
+		philipsHueController.setup();
 		waitUntilBridgeIsSelected();
 
 		String responseText = philipsHueController.getNumberOfLights() + "";

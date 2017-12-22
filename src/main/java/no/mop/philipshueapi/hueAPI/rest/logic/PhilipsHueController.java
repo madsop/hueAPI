@@ -4,12 +4,11 @@ import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 import no.mop.philipshueapi.hueAPI.rest.HueAPIException;
-import no.mop.philipshueapi.hueAPI.rest.HueProperties;
-import no.mop.philipshueapi.hueAPI.rest.sdk.NotificationManagerAdapter;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.List;
 
 @ApplicationScoped
 @SuppressWarnings("unused")
@@ -19,36 +18,37 @@ public class PhilipsHueController {
     private SDKFacade sdk;
 
     @Inject
-    private BridgeConnector bridgeConnector;
+    private SetupController setupController;
 
-    @Inject
-    private HueProperties hueProperties;
-
-    @Inject
-    private NotificationManagerAdapter notificationManagerAdapter;
-
-    public void run() {
-        bridgeConnector.connectToLastKnownAccessPoint();
-        notificationManagerAdapter.registerSDKListener();
-        bridgeConnector.findBridges();
+    public void setup() {
+        setupController.setup();
     }
 
     public void switchStateOfGivenLight(PHBridge bridge, int lightIndex, int brightness) {
         PHLight light = getGivenLight(bridge, lightIndex);
-        PHLightState lastKnownLightState = light.getLastKnownLightState();
-        if (!lastKnownLightState.isReachable()) {
-            throw new HueAPIException("Light " + lightIndex + " is not reachable.");
-        }
+        PHLightState lastKnownLightState = getLastKnownLightState(lightIndex, light);
         System.out.println("New brightness: " + brightness);
         lastKnownLightState.setBrightness(brightness);
         //bridge.updateLightState(light, lastKnownLightState);
     }
 
+    private PHLightState getLastKnownLightState(int lightIndex, PHLight light) {
+        PHLightState lastKnownLightState = light.getLastKnownLightState();
+        if (!lastKnownLightState.isReachable()) {
+            throw new HueAPIException("Light " + lightIndex + " is not reachable.");
+        }
+        return lastKnownLightState;
+    }
+
     PHLight getGivenLight(PHBridge bridge, int lightIndex) {
-        return bridge.getResourceCache().getAllLights().get(lightIndex);
+        return getAllLights(bridge).get(lightIndex);
     }
 
     public int getNumberOfLights() {
-        return sdk.getSelectedBridge().getResourceCache().getAllLights().size();
+        return getAllLights(sdk.getSelectedBridge()).size();
+    }
+
+    private List<PHLight> getAllLights(PHBridge selectedBridge) {
+        return selectedBridge.getResourceCache().getAllLights();
     }
 }
