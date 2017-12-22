@@ -7,6 +7,7 @@ import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.function.Supplier;
 
 
 @Path("/hue")
@@ -32,17 +33,12 @@ public class WildflyEntryPoint {
 		philipsHueController.setup();
 
 		waitUntilBridgeIsSelected();
-		try {
-			philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
-			return Response.ok(getResponseText(lightIndex, brightness)).build();
-		}
-		catch (HueAPIException e) {
-			logger.error(e);
-			return Response.ok(e.getMessage()).build();
-		}
-	}
+        return doCall(() ->
+                        philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness),
+                () -> getResponseText(lightIndex, brightness));
+    }
 
-	@GET
+    @GET
 	@Produces("text/plain")
 	@Consumes("text/plain")
 	@Path("/lights")
@@ -50,11 +46,11 @@ public class WildflyEntryPoint {
 		philipsHueController.setup();
 		waitUntilBridgeIsSelected();
 
-		String responseText = philipsHueController.getNumberOfLights() + "";
-		return Response.ok(responseText).build();
+		return doCall(() -> {}, () -> philipsHueController.getNumberOfLights() + "");
 	}
 
 	private void waitUntilBridgeIsSelected() {
+	    int counter = 0;
 		while (sdk.getSelectedBridge() == null) {
 			try {
 				System.out.println("Waiting for bridgeselection");
@@ -63,10 +59,24 @@ public class WildflyEntryPoint {
 			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if (counter++ > 30) {
+				throw new HueAPIException("Waited too long for bridgeselection");
+			}
 		}
 	}
 
 	private String getResponseText(int lightIndex, Integer newBrightness) {
 		return "The new brightness of light " + lightIndex + " is " + newBrightness;
 	}
+
+    private Response doCall(Runnable runnable, Supplier<String> responseTextSupplier) {
+        try {
+            runnable.run();
+            return Response.ok(responseTextSupplier.get()).build();
+        }
+        catch (HueAPIException e) {
+            logger.error(e);
+            return Response.ok(e.getMessage()).build();
+        }
+    }
 }
