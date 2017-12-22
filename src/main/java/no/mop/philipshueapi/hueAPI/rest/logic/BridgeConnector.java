@@ -7,10 +7,12 @@ import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHBridgeConfiguration;
 import com.philips.lighting.model.PHBridgeResourcesCache;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
+import no.mop.philipshueapi.hueAPI.rest.Logger;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -23,6 +25,10 @@ class BridgeConnector {
     @SuppressWarnings("unused")
     @Inject
     private HueProperties hueProperties;
+
+    @SuppressWarnings("unused")
+    @Inject
+    private Logger logger;
 
     public void connectToLastKnownAccessPoint() {
         Optional<String> username = Optional.ofNullable(hueProperties.getUsername());
@@ -47,7 +53,7 @@ class BridgeConnector {
         searchManager.search(true, true);
     }
 
-    public void connect(PHAccessPoint accessPoint) {
+    private void connect(PHAccessPoint accessPoint) {
         if (getConnectedIPAddress(sdk).isPresent()) {
             return;
         }
@@ -69,5 +75,12 @@ class BridgeConnector {
 
     String getLastIpAddress(PHBridge bridge) {
         return bridge.getResourceCache().getBridgeConfiguration().getIpAddress();
+    }
+
+    public void connectToArbitraryAccessPoint(List<PHAccessPoint> list) {
+        list.stream()
+                .peek(accessPoint -> logger.fine("Found access point " + accessPoint.getIpAddress()))
+                .limit(1)
+                .forEach(this::connect);
     }
 }

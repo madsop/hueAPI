@@ -21,8 +21,8 @@ EXPOSE 8080
 # install
 RUN mvn clean install
 
-ADD /target/demo-swarm.jar demo-swarm.jar
+ADD /target/philips-hue-api-swarm.jar philips-hue-api-swarm.jar
 
 # run
-ENTRYPOINT ["java", "-jar", "demo-swarm.jar"]
+ENTRYPOINT ["java", "-jar", "philips-hue-api-swarm.jar"]
 CMD ["-Djava.net.preferIPv4Stack=true"]

@@ -20,6 +20,10 @@ public class WildflyEntryPoint {
 	@Inject
 	private SDKFacade sdk;
 
+	@SuppressWarnings("unused")
+	@Inject
+	private Logger logger;
+
 	@GET
 	@Produces("text/plain")
 	@Consumes("text/plain")
@@ -30,18 +34,12 @@ public class WildflyEntryPoint {
 		waitUntilBridgeIsSelected();
 		try {
 			philipsHueController.switchStateOfGivenLight(sdk.getSelectedBridge(), lightIndex, brightness);
-
 			return Response.ok(getResponseText(lightIndex, brightness)).build();
 		}
 		catch (HueAPIException e) {
-			logException(e);
+			logger.error(e);
 			return Response.ok(e.getMessage()).build();
 		}
-	}
-
-	private void logException(HueAPIException e) {
-		System.err.println(e.getMessage());
-		e.printStackTrace();
 	}
 
 	@GET
@@ -69,6 +67,6 @@ public class WildflyEntryPoint {
 	}
 
 	private String getResponseText(int lightIndex, Integer newBrightness) {
-		return "WildFly Swarm! The new brightness of light " + lightIndex + " is " + newBrightness;
+		return "The new brightness of light " + lightIndex + " is " + newBrightness;
 	}
 }

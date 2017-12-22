@@ -36,7 +36,7 @@
   </dependencyManagement>
 
   <build>
-    <finalName>demo</finalName>
+    <finalName>philips-hue-api</finalName>
     <plugins>
       <plugin>
         <groupId>org.wildfly.swarm</groupId>

@@ -5,6 +5,7 @@ import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHHueParsingError;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
+import no.mop.philipshueapi.hueAPI.rest.Logger;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,9 +27,13 @@ public class Listener implements PHSDKListener {
     @Inject
     private BridgeConnector bridgeConnector;
 
+    @SuppressWarnings("unused")
+    @Inject
+    private Logger logger;
+
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-        finePrint("Cache updated for " + bridgeConnector.getLastIpAddress(phBridge));
+        logger.fine("Cache updated for " + bridgeConnector.getLastIpAddress(phBridge));
     }
 
     @Override
@@ -38,16 +43,13 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onAuthenticationRequired(PHAccessPoint accessPoint) {
-        print("Authentication required on " + accessPoint);
+        logger.warn("Authentication required on " + accessPoint);
         sdk.startPushlinkAuthentication(accessPoint);
     }
 
     @Override
     public void onAccessPointsFound(List<PHAccessPoint> list) {
-        list.stream()
-                .peek(accessPoint -> finePrint("Found access point " + accessPoint.getIpAddress()))
-                .limit(1)
-                .forEach(bridgeConnector::connect);
+        bridgeConnector.connectToArbitraryAccessPoint(list);
     }
 
     @Override
@@ -57,24 +59,16 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onConnectionResumed(PHBridge phBridge) {
-        finePrint("Connection resumed");
-    }
-
-    private void finePrint(String message) {
-        // Eventually consider to introduce logger.fine here
+        logger.fine("Connection resumed");
     }
 
     @Override
     public void onConnectionLost(PHAccessPoint accessPoint) {
-        print("Lost connection to " + accessPoint);
+        logger.warn("Lost connection to " + accessPoint);
     }
 
     @Override
     public void onParsingErrors(List<PHHueParsingError> list) {
-        list.forEach(System.err::println);
-    }
-
-    private void print(String text) {
-        System.out.println(text);
+        logger.logParsingErrors(list);
     }
 }
