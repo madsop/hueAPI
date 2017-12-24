@@ -52,7 +52,7 @@ public class WildflyEntryPoint {
 	    int counter = 0;
 		while (sdk.getSelectedBridge() == null) {
 			try {
-				System.out.println("Waiting for bridgeselection");
+				logger.info("Waiting for bridgeselection");
 				Thread.sleep(200);
 			}
 			catch (InterruptedException e) {

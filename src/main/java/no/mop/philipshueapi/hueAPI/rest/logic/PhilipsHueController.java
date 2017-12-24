@@ -9,6 +9,7 @@ import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 @SuppressWarnings("unused")
@@ -20,6 +21,8 @@ public class PhilipsHueController {
     @Inject
     private SetupController setupController;
 
+    private Logger logger = Logger.getLogger(getClass().getSimpleName());
+
     public void setup() {
         setupController.setup();
     }
@@ -27,7 +30,7 @@ public class PhilipsHueController {
     public void switchStateOfGivenLight(PHBridge bridge, int lightIndex, int brightness) {
         PHLight light = getGivenLight(bridge, lightIndex);
         PHLightState lastKnownLightState = getLastKnownLightState(lightIndex, light);
-        System.out.println("New brightness: " + brightness);
+        logger.fine("New brightness: " + brightness);
         lastKnownLightState.setBrightness(brightness);
         //bridge.updateLightState(light, lastKnownLightState);
     }
