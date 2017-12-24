@@ -5,12 +5,13 @@ import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHHueParsingError;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
-import no.mop.philipshueapi.hueAPI.rest.Logger;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class Listener implements PHSDKListener {
@@ -27,9 +28,7 @@ public class Listener implements PHSDKListener {
     @Inject
     private BridgeConnector bridgeConnector;
 
-    @SuppressWarnings("unused")
-    @Inject
-    private Logger logger;
+    private Logger logger = Logger.getLogger(getClass().getSimpleName());
 
     @Override
     public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
@@ -43,7 +42,7 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onAuthenticationRequired(PHAccessPoint accessPoint) {
-        logger.warn("Authentication required on " + accessPoint);
+        logger.warning("Authentication required on " + accessPoint);
         sdk.startPushlinkAuthentication(accessPoint);
     }
 
@@ -54,7 +53,7 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onError(int i, String s) {
-        logger.error(i, s);
+        logger.severe("Error: " + i + ": " + s);
     }
 
     @Override
@@ -64,11 +63,16 @@ public class Listener implements PHSDKListener {
 
     @Override
     public void onConnectionLost(PHAccessPoint accessPoint) {
-        logger.warn("Lost connection to " + accessPoint);
+        logger.warning("Lost connection to " + accessPoint);
     }
 
     @Override
     public void onParsingErrors(List<PHHueParsingError> list) {
-        logger.logParsingErrors(list);
+        logParsingErrors(list);
     }
+
+    private void logParsingErrors(Collection<PHHueParsingError> errors) {
+        errors.forEach(str -> logger.severe(str.getMessage()));
+    }
+
 }

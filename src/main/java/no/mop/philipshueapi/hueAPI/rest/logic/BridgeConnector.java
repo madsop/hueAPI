@@ -7,13 +7,13 @@ import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHBridgeConfiguration;
 import com.philips.lighting.model.PHBridgeResourcesCache;
 import no.mop.philipshueapi.hueAPI.rest.HueProperties;
-import no.mop.philipshueapi.hueAPI.rest.Logger;
 import no.mop.philipshueapi.hueAPI.rest.sdk.SDKFacade;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 class BridgeConnector {
@@ -26,9 +26,7 @@ class BridgeConnector {
     @Inject
     private HueProperties hueProperties;
 
-    @SuppressWarnings("unused")
-    @Inject
-    private Logger logger;
+    private Logger logger = Logger.getLogger(getClass().getSimpleName());
 
     public void connectToLastKnownAccessPoint() {
         Optional<String> username = Optional.ofNullable(hueProperties.getUsername());

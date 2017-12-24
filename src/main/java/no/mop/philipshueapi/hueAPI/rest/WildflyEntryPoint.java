@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 
 @Path("/hue")
@@ -21,9 +22,7 @@ public class WildflyEntryPoint {
 	@Inject
 	private SDKFacade sdk;
 
-	@SuppressWarnings("unused")
-	@Inject
-	private Logger logger;
+	private Logger logger = Logger.getLogger(getClass().getSimpleName());
 
 	@GET
 	@Produces("text/plain")
@@ -75,7 +74,7 @@ public class WildflyEntryPoint {
             return Response.ok(responseTextSupplier.get()).build();
         }
         catch (HueAPIException e) {
-            logger.error(e);
+            logger.severe(e.getMessage());
             return Response.ok(e.getMessage()).build();
         }
     }
