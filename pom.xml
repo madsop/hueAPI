@@ -43,6 +43,7 @@
         <artifactId>wildfly-swarm-plugin</artifactId>
         <version>${version.wildfly.swarm}</version>
         <configuration>
+          <!--<debugPort>5005</debugPort>-->
           <arguments>
               <argument>-Djava.net.preferIPv4Stack=true</argument>
           </arguments>
@@ -59,6 +60,18 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.wildfly.swarm</groupId>
+      <artifactId>microprofile</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.microprofile</groupId>
+      <artifactId>microprofile</artifactId>
+      <version>1.2</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
     <!-- Hue SDK -->
     <dependency>
       <groupId>no.mop.philipshue</groupId>
@@ -69,13 +82,6 @@
       <groupId>no.mop.philipshue</groupId>
       <artifactId>huesdkresources</artifactId>
       <version>1.0</version>
-    </dependency>
-    <!-- Java EE 7 dependency -->
-    <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-      <version>7.0</version>
-      <scope>provided</scope>
     </dependency>
     <!-- WildFly Swarm Fractions -->
 
